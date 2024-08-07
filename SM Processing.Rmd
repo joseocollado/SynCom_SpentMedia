@@ -1,0 +1,491 @@
+---
+title: "Spent Media Processing"
+author: "Jose Collado"
+date: "2024-05-01"
+output: html_document
+---
+```{r color palettes, echo=FALSE}
+safe_colorblind_palette <- c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499", 
+                             "#44AA99", "#999933", "#882255", "#661100", "#6699CC", "#888888")
+```
+
+```{r Formatting ALL Plate Data with Strain Specific Maps}
+library(plater) # to merge multiple plates
+library(data.table) # for melt
+library(gcplyr) # for import_blockdesigns
+library(dplyr) # for %>% "chain" ability
+library(fs) # for dir_ls command
+
+setwd("~/OneDrive/Work.Academic/Berkeley/Postbac/R Files/24.4.30 SM Processing/Bacterial Data")
+
+#load in plate maps for all P1
+read.csv("plate_map1.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map1_SC14.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map1_SC16.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map1_SC21-DC.csv", header = FALSE, colClasses = "character")
+
+#load in all plate maps for P2
+read.csv("plate_map2.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map2_SC01.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map2_SC03.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map2_SC26.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map2_SC33.csv", header = FALSE, colClasses = "character")
+read.csv("plate_map2_SC14-16_25-35.csv", header = FALSE, colClasses = "character")
+
+# define bacterial names we're looking at
+bac_list <- c("DC","SC01","SC02","SC03","SC04","SC06","SC09","SC10","SC13","SC14","SC16","SC21","SC23","SC25","SC26","SC33","SC35")
+
+# define function to merge files for loop
+get_binded_data <- function(data_name) {
+   dplyr::bind_rows(mget(data_name, envir = .GlobalEnv), .id = "File_Name")
+  }
+
+# use for loop to run for each bacteria
+for (bacteria in bac_list) {
+  setwd("~/OneDrive/Work.Academic/Berkeley/Postbac/R Files/24.4.30 SM Processing/Bacterial Data")
+  #define csv name
+  file1 <- paste0(bacteria,"_P1_plater.csv")
+  
+  #load in data
+  bacteria_P1 <- read_plate(
+            file = file1,
+            well_ids_column = "Well",
+            sep = ","
+            )
+  
+  #name & data check
+  #print(bacteria_P1)
+  
+  if (bacteria == "SC14"){
+    # load in correct plate map
+    designs_P1 <- import_blockdesigns(files = "plate_map1_SC14.csv")
+    
+    #merged P1 plate map and data
+    bacteria_P1 <- merge_dfs(bacteria_P1, designs_P1)
+    
+    #correct column names 
+    names(bacteria_P1) <- gsub("plate_map1_SC14","plate_map1",names(bacteria_P1))
+  
+    #reformat the data from wide to long
+    bacteria_P1 <- melt(setDT(bacteria_P1),id.vars=c("Well","plate_map1"), variable.name = "Time")
+    
+  } else if (bacteria == "SC16"){
+      # load in correct plate map
+      designs_P1 <- import_blockdesigns(files = "plate_map1_SC16.csv")
+    
+      #merged P1 plate map and data
+      bacteria_P1 <- merge_dfs(bacteria_P1, designs_P1)
+    
+      #correct column names 
+      names(bacteria_P1) <- gsub("plate_map1_SC16","plate_map1",names(bacteria_P1))
+  
+      #reformat the data from wide to long
+      bacteria_P1 <- melt(setDT(bacteria_P1),id.vars=c("Well","plate_map1"), variable.name = "Time")
+      
+      } else if (bacteria == "DC" | bacteria == "SC21" | bacteria == "SC23" | bacteria == "SC25" | bacteria == "SC26" | bacteria == "SC33" | bacteria == "SC35") {
+          # load in correct plate map
+          designs_P1 <- import_blockdesigns(files = "plate_map1_SC21-DC.csv")
+    
+          #merged P1 plate map and data
+          bacteria_P1 <- merge_dfs(bacteria_P1, designs_P1)
+    
+          #correct column names 
+          names(bacteria_P1) <- gsub("plate_map1_SC21-DC","plate_map1",names(bacteria_P1))
+  
+          #reformat the data from wide to long
+          bacteria_P1 <- melt(setDT(bacteria_P1),id.vars=c("Well","plate_map1"), variable.name = "Time")
+          } else if (bacteria != "DC"| bacteria != "SC14"| bacteria != "SC16"| bacteria != "SC21" | bacteria != "SC23" | bacteria != "SC25" | bacteria != "SC26" | bacteria != "SC33" | bacteria != "SC35"){
+            #load in general plate map
+            designs_P1 <- import_blockdesigns(files = "plate_map1.csv")
+  
+            #merged P1 plate map and data
+            bacteria_P1 <- merge_dfs(bacteria_P1, designs_P1)
+  
+            #reformat the data from wide to long
+            bacteria_P1 <- melt(setDT(bacteria_P1),id.vars=c("Well","plate_map1"), variable.name = "Time")
+            } 
+  
+  #define csv name
+  file2 <- paste0(bacteria,"_P2_plater.csv")
+  
+  #load in data
+  bacteria_P2 <- read_plate(
+            file = file2,
+            well_ids_column = "Well",
+            sep = ","
+            )
+  
+  if (bacteria == "SC01"){
+    # load in correct plate map
+    designs_P2 <- import_blockdesigns(files = "plate_map2_SC01.csv")
+    
+    #merged P1 plate map and data
+    bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+    
+    #correct column names 
+    names(bacteria_P2) <- gsub("plate_map2_SC01","plate_map2",names(bacteria_P2))
+  
+    #reformat the data from wide to long
+    bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+    } else if (bacteria == "SC03"){
+        # load in correct plate map
+        designs_P2 <- import_blockdesigns(files = "plate_map2_SC03.csv")
+    
+        #merged P1 plate map and data
+        bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+    
+        #correct column names 
+        names(bacteria_P2) <- gsub("plate_map2_SC03","plate_map2",names(bacteria_P2))
+  
+        #reformat the data from wide to long
+        bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+        } else if (bacteria == "SC26"){
+              # load in correct plate map
+              designs_P2 <- import_blockdesigns(files = "plate_map2_SC26.csv")
+    
+              #merged P1 plate map and data
+              bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+    
+              #correct column names 
+              names(bacteria_P2) <- gsub("plate_map2_SC26","plate_map2",names(bacteria_P2))
+  
+              #reformat the data from wide to long
+            bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+            } else if (bacteria == "SC33"){
+                # load in correct plate map
+                designs_P2 <- import_blockdesigns(files = "plate_map2_SC33.csv")
+    
+                #merged P1 plate map and data
+                bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+    
+                #correct column names 
+                names(bacteria_P2) <- gsub("plate_map2_SC33","plate_map2",names(bacteria_P2))
+  
+                #reformat the data from wide to long
+                bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+                } else if (bacteria == "SC14" | bacteria == "SC16" | bacteria == "SC25" | bacteria == "SC35") {
+          
+                  # load in correct plate map
+                  designs_P2 <- import_blockdesigns(files = "plate_map2_SC14-16_25-35.csv")
+    
+                  #merged P1 plate map and data
+                  bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+    
+                  #correct column names 
+                  names(bacteria_P2) <- gsub("plate_map2_SC14-16_25-35","plate_map2",names(bacteria_P2))
+  
+                  #reformat the data from wide to long
+                  bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+                } else if (bacteria != "SC01"| bacteria != "SC03" | bacteria != "SC14" | bacteria != "SC16" | bacteria != "SC25" | bacteria != "SC26" | bacteria != "SC33" | bacteria != "SC35"){
+                    #load in general plate map
+                    designs_P2 <- import_blockdesigns(files = "plate_map2.csv")
+  
+                    #merged P1 plate map and data
+                    bacteria_P2 <- merge_dfs(bacteria_P2, designs_P2)
+  
+                    #reformat the data from wide to long
+                    bacteria_P2 <- melt(setDT(bacteria_P2),id.vars=c("Well","plate_map2"), variable.name = "Time")
+                      }
+  
+  #running new command to combine datasets and add column that is the file name
+  bacteria_plates_long <- get_binded_data(c("bacteria_P1","bacteria_P2"))
+  
+  #define old values to be replaced with new values
+  lookup <- tribble(
+  ~File_Name, ~Plate,
+  "bacteria_P1",     "Plate 1",
+  "bacteria_P2",     "Plate 2"
+    )
+  
+  # make dataset of matched columns and their values
+  FileName_Replacement <- tibble(x = bacteria_plates_long$File_Name) %>% 
+    left_join(lookup, by = c("x" = "File_Name"))
+  
+  #replace target column
+  bacteria_plates_long$File_Name <- FileName_Replacement$Plate
+  
+  #correct column names 
+  names(bacteria_plates_long) <- gsub("File_Name","Plate",names(bacteria_plates_long))
+  
+  # use coalesce from dplyr to merge plate1 & plate2 columns & remove NAs into new column 
+  Spent_Media_IDs <- bacteria_plates_long %>% mutate(Spent_Media = coalesce(plate_map1,plate_map2)) %>%
+  select(Plate,Spent_Media) 
+  
+  #delete old columns
+  bacteria_plates_long$plate_map1 <- NULL
+  bacteria_plates_long$plate_map2 <- NULL
+  
+  # add joined plate SM identity column
+  bacteria_plates_long$Spent_Media <- Spent_Media_IDs$Spent_Media
+  
+  # move column location using relocate from dplyr
+  bacteria_plates_long <- bacteria_plates_long %>% 
+  relocate(Spent_Media,.after = Well)
+  
+  # define name of bacteria plates file
+  bacteria_name <- paste0(bacteria,"_plates_long")
+  
+  # save data onto correctly named variable
+  assign(bacteria_name,bacteria_plates_long)
+
+}
+
+# clean up environment
+remove(list=ls(pattern="bacteria"))
+remove(list=ls(pattern="list"))
+remove(list=ls(pattern="designs"))
+remove(list=ls(pattern="file"))
+remove(Spent_Media_IDs)
+```
+
+```{r Merge ALL Plate Data}
+all_plates <- get_binded_data(c("DC_plates_long","SC01_plates_long","SC02_plates_long","SC03_plates_long","SC04_plates_long","SC06_plates_long","SC09_plates_long","SC10_plates_long","SC13_plates_long","SC14_plates_long","SC16_plates_long","SC21_plates_long","SC23_plates_long","SC25_plates_long","SC26_plates_long","SC33_plates_long","SC35_plates_long"))
+  
+  #define old values to be replaced with new values
+  lookup <- tribble(
+  ~File_Name, ~Plate,
+  "DC_plates_long",     "DC3000",
+  "SC01_plates_long",     "SC01",
+  "SC02_plates_long",     "SC02",
+  "SC03_plates_long",     "SC03",
+  "SC04_plates_long",     "SC04",
+  "SC06_plates_long",     "SC06",
+  "SC09_plates_long",     "SC09",
+  "SC10_plates_long",     "SC10",
+  "SC13_plates_long",     "SC13",
+  "SC14_plates_long",     "SC14",
+  "SC16_plates_long",     "SC16",
+  "SC21_plates_long",     "SC21",
+  "SC23_plates_long",     "SC23",
+  "SC25_plates_long",     "SC25",
+  "SC26_plates_long",     "SC26",
+  "SC33_plates_long",     "SC33",
+  "SC35_plates_long",     "SC35"
+    )
+  
+# make dataset of matched columns and their values
+FileName_Replacement <- tibble(x = all_plates$File_Name) %>% 
+    left_join(lookup, by = c("x" = "File_Name"))
+  
+#replace target column
+all_plates$File_Name <- FileName_Replacement$Plate
+  
+#correct column names 
+names(all_plates) <- gsub("File_Name","Bacteria",names(all_plates))
+names(all_plates) <- gsub("value","Measurements",names(all_plates))
+
+#clean up environment
+remove(lookup)
+remove(FileName_Replacement)
+remove(list=ls(pattern="_plates_long"))
+remove(list=ls(pattern="bacteria"))
+```
+
+```{r ALL Plates Normalization & Visualization}
+library(ggplot2) # we love graphing
+
+# get mean of Blanks
+all_plates %>% subset(Spent_Media %in% c("Blank (MgCl2 control)","Negative  Control")) %>% 
+  summarise(mean = mean(Measurements)) %>%
+  print()
+
+#subtract mean from all measurements
+all_plates$Measurements <- all_plates$Measurements - 0.1002
+
+bac_list <- c("DC3000","SC01","SC02","SC03","SC04","SC06","SC09","SC10","SC13","SC14","SC16","SC21","SC23","SC25","SC26","SC33","SC35")
+
+for (bacteria in bac_list) {
+  bac_graph <- ggplot(subset(all_plates,Bacteria %in% bacteria),aes(x = Time, y = Measurements)) +
+  geom_point(size = 0.7, aes(color = Spent_Media)) +
+  facet_wrap(~Spent_Media) + theme(axis.text.x = element_text(size= 6.5)) +
+  theme(legend.position = "none") +
+  labs(x="Time (hours)", y="Measurements @ OD 600 nm",title = bacteria)
+  
+  print(bac_graph)
+  
+}
+```
+
+```{r Data Point Visualization}
+library(ggplot2) # we love graphing
+
+#change this variable to change the title and pulled data
+graph_bac <- "SC35"
+
+# all growth curves of ^ bacteria
+ggplot(subset(all_plates, Bacteria %in% graph_bac),aes(x = Time, y = Measurements)) +
+  geom_point(size = 1, aes(color = Spent_Media)) +
+  facet_wrap(~Spent_Media) + theme(axis.text.x = element_text(size= 10)) +
+  theme(strip.text.x = element_text(size=10)) +
+  theme(legend.position = "none") +
+  labs(x="Time (hours)", y="Measurements @ OD 600 nm",title = paste0(graph_bac," Plates Data"))
+
+#change this variable to change the title and pulled data
+graph_bac <- "SC13"
+
+#specific what spent media to graph
+SM_list <- c("Fresh media","SS_DC3000","SS_SC01","SS_SC02","SS_SC03","SS_SC04","SS_SC06","SS_SC09","SS_SC10","SS_SC13","SS_SC14","SS_SC16","SS_SC21","SS_SC23","SS_SC25","SS_SC26","SS_SC33","SS_SC35","FSC + DC3000","FSC SM","Blank (MgCl2 control)","Negative Control")
+
+ggplot(subset(all_plates, Bacteria %in% graph_bac & Spent_Media %in% SM_list),aes(x = Time, y = Measurements)) +
+  geom_point(size = 1, aes(color = Spent_Media)) +
+  facet_wrap(~Spent_Media) + 
+  theme(axis.text.x = element_text(size= 10)) +
+  theme(strip.text.x = element_text(size=10)) +
+  theme(legend.position = "none") +
+  labs(x="Time (hours)", y="Measurements @ OD 600 nm",title = paste0(graph_bac," Plates Data"))
+
+bacteria_order <- c("Negative Control","Fresh media","Blank (MgCl2 control)","SS_SC35", "SS_SC13")
+
+#select SM
+ggplot(subset(all_plates, Bacteria %in% "SC13" & Spent_Media %in% bacteria_order),aes(x = Time, y = Measurements)) +
+  geom_point(size = 1.5, aes(color = Spent_Media)) +
+  facet_wrap(~factor(Spent_Media,levels = bacteria_order)) + 
+  scale_color_manual(values=safe_colorblind_palette) +
+  theme(axis.text.x = element_text(size= 10),axis.text.y = element_text(size= 10)) +
+  theme(strip.text.x = element_text(size=12)) +
+  theme(legend.position = "none") +
+  labs(x="Time (hours)", y="Measurements @ OD 600 nm",title = "SC13 Plates Data")
+  
+# SM subsetting
+#& Spent_Media %in% c("Fresh media","Negative Control","DO_GP")
+
+#to order facets
+#facet_grid(~factor(Spent_Media,levels = bacteria_order))
+  
+# to chance facet graph title text size
+# theme(strip.text.x = element_text(size=10)) +
+  
+# color palette
+#scale_color_manual(values=safe_colorblind_palette) 
+
+```
+
+As of 24.5.10, do not focus on stats. Instead try to 
+1. visualize all raw data 
+2. figure out what questions you want to ask
+3. make figures that answer the questions
+4. figure out stats
+
+```{r AUC in 13 SM Comparison}
+library(rstatix) # for t-tests?
+library(ggplot2) # we love graphing
+library(ggpubr) # for ggboxplot?
+
+#copy all information to new variable
+all_plates_auc <- all_plates
+
+# change factor variables to number in order to run AUC values
+all_plates_auc$Time <- as.numeric(levels(all_plates_auc$Time))[all_plates_auc$Time]
+
+# to confirm it works 
+str(all_plates_auc)
+
+all_plates_auc <-
+  summarize(group_by(all_plates_auc, Bacteria,Plate,Well,Spent_Media),
+            auc = auc(x = Time, y = Measurements))
+
+str(all_plates_auc)
+
+#box plot graphing
+ggboxplot(subset(all_plates_auc, Spent_Media %in% c("SS_SC13","Fresh media")), x = "Bacteria", y = "auc", fill = "Spent_Media") +
+  scale_fill_manual(values = safe_colorblind_palette) +
+  xlab("Bacteria") + ylab("Area Under the Curve (AUC)") +
+  theme(legend.position = "bottom") +
+  guides(fill=guide_legend(title= "Media Type")) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  
+
+#grouping by treatment group and performing t-test
+all_plates_auc_test <- all_plates_auc %>%
+  subset(Spent_Media %in% c("SS_SC13","Fresh media")) %>%
+  group_by(Bacteria) %>%
+  t_test(auc ~ Spent_Media) %>%
+  adjust_pvalue() %>%
+  add_significance("p.adj")
+
+# add x axis position value for each Bacteria
+all_plates_auc_test <- all_plates_auc_test %>% add_xy_position(x = "Bacteria")
+
+# load bxp into separate variable 
+all_plates_auc_test_p <- ggboxplot(subset(all_plates_auc, Spent_Media %in% c("SS_SC13","Fresh media")), x = "Bacteria", y = "auc", fill = "Spent_Media")
+
+#graph data with significance values
+all_plates_auc_test_p + 
+  stat_pvalue_manual(all_plates_auc_test, label = "p.adj.signif", y.position=(75)*1.1) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.10))) +
+  scale_fill_manual(values = safe_colorblind_palette) +
+  xlab("SynCom Member") + ylab("Area Under the Curve (AUC)") +
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  guides(fill=guide_legend(title= "Media Type"))
+
+```
+
+```{r Heatmap creation?}
+
+#24.06.03 Tiffany made a heatmap figure for the Symposuim Presentation. 
+# Have files, need to get code from her
+
+
+```
+
+```{r Correlation Graph}
+library(dplyr) # for summarize
+library(gcplyr) # for auc
+library(ggplot2) # we <3 graphing
+library(ggpubr) # for easier graphing?
+
+# after 24.05.31 meeting with Britt
+# graph impact on self vs impact on others
+
+
+SM_list <- c("Fresh media","DC3000","SC01","SC02","SC03","SC04","SC06","SC09","SC10","SC13","SC14","SC16","SC21","SC23","SC25","SC26","SC33","SC35")
+
+# make df with empty columns
+auc_summarized = all_plates[FALSE,]
+
+for (SM in SM_list) {
+  
+  if (SM == "Fresh media"){
+    SS_summarized <- subset(all_plates, Spent_Media %in% SM)
+    print(SS_summarized)
+    
+    } else if (SM != "Fresh media"){
+      SS_summarized <- subset(all_plates, Spent_Media %in% paste0("SS_",SM))
+      print(SS_summarized)
+      }
+  
+  #SS_summarized$auc <- SS_summarized$auc - SS_summarized$auc[1]
+  auc_summarized <- rbind(auc_summarized,SS_summarized)
+  SS_summarized <- NULL
+  }
+
+# change factor variables to number in order to run AUC values
+auc_summarized$Time <- as.numeric(levels(auc_summarized$Time))[auc_summarized$Time]
+
+# summarize all replicates of bacteria in SM across both plates
+auc_summarized <- summarize(group_by(auc_summarized,Bacteria,Spent_Media),
+            auc = auc(x = Time, y = Measurements))
+
+# don't like how this graph looks
+#ggdotplot(auc_summarized, x = "Bacteria", y = "auc", fill = "Bacteria") + 
+  #theme(legend.position = "none")
+
+#plot data
+ggplot(data= auc_summarized, aes(x = Bacteria, y = auc, color = Bacteria)) + 
+  geom_point(shape = 1, size = 3) + 
+  theme(legend.position = "none") +
+  geom_smooth(method = "lm", se = FALSE)
+
+#clean up environment
+remove(SS_summarized)
+remove(list=ls(pattern="SM"))
+```
+
+```{r End Product Visualization}
+# could potentially use this once all plate stats are done 
+# https://rpubs.com/artur_matysik/plot-96well-heatmap
+
+#well_plot <- ggplo
+```
+
