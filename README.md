@@ -11,7 +11,7 @@ This Excel sheet contains all the plate maps used across the project. 'plate_map
 
 ## Spent Media Catalogue.xlsx
 
-
+This Excel sheet has basic information about the Syncom & details the system used to generate and store all the spent media types. The sheet includes: time and date each SM started and ended, how each SM was filtered, where each SM was stored, and what bacterial cultures are in each SM type.
 
 ## Heatmap_SingleSpent_NoVal.pdf
 
