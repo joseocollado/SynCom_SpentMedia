@@ -7,7 +7,11 @@ My master R markdown file was used when drafting my code, running stat tests, ge
 
 ## plate_maps.xlsx
 
+This Excel sheet contains all the plate maps used across the project. 'plate_map1' and 'plate_map2' are the master maps and any additional maps were made in response to errors or changes to the wells as needed.
+
 ## Spent Media Catalogue.xlsx
+
+
 
 ## Heatmap_SingleSpent_NoVal.pdf
 
