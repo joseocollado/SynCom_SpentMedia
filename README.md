@@ -1,5 +1,5 @@
 # SynCom_SpentMedia
-All files related to spent media project in the Koskella Lab
+All files related to the spent media project using the Koskella Lab's 16 Synthetic Community and _P. syringae pv. tomato DC3000_.
 
 ## SM Processing.Rmd
 
