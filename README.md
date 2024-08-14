@@ -5,7 +5,7 @@ All files related to the spent media project using the Koskella Lab's 16 Synthet
 
 ### SM Processing.Rmd
 
-My master R markdown file was used when drafting my code, running stat tests, generating figures, and more. With no prior experience in coding (any langauge) I learned what I needed this year from my mxntor, lab mates, and the internet. Any respectful tips, suggestions, edits, etc. are more than welcome.
+My master R markdown file was used when drafting my code, running stat tests, generating figures, and more. With no prior experience in coding (any language) I learned what I needed this year from my mxntor, lab mates, and the internet. Any respectful tips, suggestions, edits, etc. are more than welcome.
 
 ### plate_maps.xlsx
 
@@ -21,7 +21,7 @@ This is a heatmap that summarizes a portion of the data across the whole communi
 - Growth<sub>Spent</sub> is the AUC of a bacteria in a specific SM type.
 - Growth<sub>Fresh</sub> is the AUC of a bacteria's baseline growth in fresh media.
 
-The more blue a cell color, the more positive its growth factor is in that SM and vice versa with the yellow-red cells. The code for this figure was done by Tiffany; I will include it in the 'SM Processing.Rmd' file once I get it.
+The more blue a cell color, the more positive its growth factor is in that SM, and vice versa with the yellow-red cells. The code for this figure was done by Tiffany; I will include it in the 'SM Processing.Rmd' file once I get it.
 
 ### Bacterial Data Folder
 
